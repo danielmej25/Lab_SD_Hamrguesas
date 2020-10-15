@@ -7,20 +7,40 @@
 #include "pedidos.h"
 #include <stdio.h>
 
+//Variable que contiene el precio de las tres hamburgesas del menu
+producto burgersBase[3];
+
+int posBurger=0;
+pedido1  registrarpedidosistema_3_arg;
+
+
 /**
  *Funcion que se encarga de consultar los valores de las hamburgusas 
  * Entradas: 
  * Salidas:
  */ 
-void cargarValoresHamburguesas();
+int cargarValoresHamburguesas(CLIENT *clnt);
 /**
  * funcion void que consulta los datos de la empresa del servidor
  * entradas: CLIENT
  * salidas:
  */
 void datosEmpresa(CLIENT *clnt);
+/**
+ * funcion void que permite comprar hamburgesas
+ * entradas: CLIENTE
+ * salidas:
+ */
+void comprarHamburgesas(CLIENT *clnt); 
+int existeHamburguesa(char *identificador);
+float consultarValorBurger(char tipo);
 
-
+/**
+ * procedimiento que imprime la lista de las hamburgesas ordenadas hasta el momento
+ * entradas
+ * salidas 
+ */
+void listarBurgersPedidas();
 /**
  * funcion void que consulta los datos de los productos del servidor
  * entradas: CLIENT
@@ -38,7 +58,7 @@ gestion_hamburguesas_3(char *host)
 	//listaProductos  *result_2;
 	//char *consultarproductos_3_arg;
 	bool_t  *result_3;
-	pedido1  registrarpedidosistema_3_arg;
+	
 
 	//Variables locales
 	int opcion=0;
@@ -54,6 +74,12 @@ gestion_hamburguesas_3(char *host)
 	}
 #endif	/* DEBUG */
 
+	//Se cargan los valores de las hamburgesas
+
+	if(cargarValoresHamburguesas(clnt)==0){
+		printf("	Lo sentimos no se pudieron cargar los precios de las hamburgesas\n");
+		exit (1);
+	}
 	
 	//Se imprime el menu de opciones
 
@@ -78,13 +104,14 @@ gestion_hamburguesas_3(char *host)
 				printf("	Informacion de los productos");
 				datosProductos(clnt);
 			
-			break;
-			
-				//Comprar Hamburguesas
+			break;			
+				
 			case 2:
-			/*
+				//Comprar Hamburguesas
+				comprarHamburgesas(clnt);
+			
 			break;
-
+			/*
 			case 3:
 				
 			break;
@@ -92,12 +119,15 @@ gestion_hamburguesas_3(char *host)
 			case 4:
 				
 			break;
+			*/
 
 
 			case 5:
-				
+				//Listar hamburgesas pedidas
+				listarBurgersPedidas();
 			break;
 
+			/*
 			case 6:
 				
 			break;
@@ -143,6 +173,38 @@ int main (int argc, char *argv[]){
 exit (0);
 }
 
+int cargarValoresHamburguesas(CLIENT *clnt){
+	int respuesta;
+
+	listaProductos  *result_2;
+	char *consultarproductos_3_arg;
+	result_2 = consultarproductos_3((void*)&consultarproductos_3_arg, clnt);
+	if (result_2 == (listaProductos *) NULL) {
+		clnt_perror (clnt, "call failed");
+	}
+
+	int i=0;
+	int banderaHecho=0;
+	while(i<CANTIDAD_PRODUCTOS&&result_2->product[i].valor!=0&&banderaHecho<3){
+		if((strcmp("Hamburguesa Pequenia", result_2->product[i].nombreIngrediente))==0){
+			strcpy(burgersBase[0].nombreIngrediente,result_2->product[i].nombreIngrediente);
+			burgersBase[0].valor=result_2->product[i].valor;
+			banderaHecho++;
+		}else if((strcmp("Hamburguesa Mediana", result_2->product[i].nombreIngrediente))==0){
+			strcpy(burgersBase[1].nombreIngrediente,result_2->product[i].nombreIngrediente);
+			burgersBase[1].valor=result_2->product[i].valor;
+			banderaHecho++;
+		}else if((strcmp("Hamburguesa Grande", result_2->product[i].nombreIngrediente))==0){
+			strcpy(burgersBase[2].nombreIngrediente,result_2->product[i].nombreIngrediente);
+			burgersBase[2].valor=result_2->product[i].valor;
+			banderaHecho++;
+		}
+		i++;
+	}
+
+	return respuesta;
+}
+
 
 
 void datosEmpresa(CLIENT *clnt){
@@ -178,4 +240,74 @@ void datosProductos(CLIENT *clnt){
 
 
 
+}
+
+
+void comprarHamburgesas(CLIENT *clnt){
+	printf("\n	Comprar hamburguesas\n\n");
+	char respuesta;
+	do{
+					
+		printf("\n Digite el identificador de la hamburguesa: ");
+		scanf("%s",registrarpedidosistema_3_arg.pedido_hamburguesas[posBurger].identificador);
+		getchar();
+		printf("\n Digite el tipo de hamburguesa p,m,g: ");
+		scanf("%c",&(registrarpedidosistema_3_arg).pedido_hamburguesas[posBurger].tipo);
+		printf("\n Didgite la cantidad de ingrediente extra: ");
+		scanf("%d",&(registrarpedidosistema_3_arg).pedido_hamburguesas[posBurger].cantidadIngredientesExtra);
+		getchar();
+		fflush(stdin);
+		registrarpedidosistema_3_arg.pedido_hamburguesas[posBurger].costo=(consultarValorBurger((registrarpedidosistema_3_arg).pedido_hamburguesas[posBurger].tipo));
+		registrarpedidosistema_3_arg.pedido_hamburguesas[posBurger].costo=consultarValorBurger((registrarpedidosistema_3_arg).pedido_hamburguesas[posBurger].tipo);
+		posBurger++;
+
+		printf("\n Si desea agregar otra hamburguesa precione y/n: ");
+		scanf("%c",&respuesta);
+	}while(respuesta == 'y' && posBurger<10);
+	return;
+	
+}
+
+int existeHamburguesa(char *identificador){
+	for(int i=0;i<MAX_PEDIDO;i++){
+		if(strcmp(identificador, registrarpedidosistema_3_arg.pedido_hamburguesas[i].identificador)==1){
+			return 1;
+		}
+	}
+	return 0;
+}
+
+float consultarValorBurger(char tipo){
+	float valor;
+
+	if(tipo=='p'){
+		valor = (burgersBase[0].valor);
+	}else if(tipo=='m'){
+		valor = (burgersBase[1].valor);
+	}else if(tipo=='g'){
+		valor = (burgersBase[2].valor);
+	}
+	return valor;
+}
+
+void listarBurgersPedidas(){
+
+	if(posBurger==0){
+		printf("\n Primero debe registrar una hamburgesa\n\n	");
+		return;
+	}
+	for(int i=0;i<posBurger;i++){
+		printf("\n	Hamburgesa (%d): %s \n",(i+1),registrarpedidosistema_3_arg.pedido_hamburguesas[i].identificador);	
+		printf("	Tamanio:");
+
+		if(registrarpedidosistema_3_arg.pedido_hamburguesas[i].tipo=='p'){
+			printf(" pequenia");
+		}else if(registrarpedidosistema_3_arg.pedido_hamburguesas[i].tipo=='m'){
+			printf(" mediana");
+		}else{
+			printf(" grande");
+		}
+		printf("\n	Ingredientes extra: %d",registrarpedidosistema_3_arg.pedido_hamburguesas[i].cantidadIngredientesExtra);
+		printf("\n	Costo: %.1f\n",registrarpedidosistema_3_arg.pedido_hamburguesas[i].costo);
+	}
 }

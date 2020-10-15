@@ -7,7 +7,7 @@ CLIENT = cliente
 SERVER = 
 
 SOURCES_CLNT.c = Cliente.c
-SOURCES_CLNT.h = pedidos.h
+SOURCES_CLNT.h = pedidos.h 
 SOURCES_SVC.c = 
 SOURCES_SVC.h = 
 SOURCES.x = pedidos.x

@@ -7,13 +7,15 @@
 #include "pedidos.h"
 #include <stdio.h>
 
+
+
 empresa *
 consultarempresa_3_svc(void *argp, struct svc_req *rqstp)
 {
 	static empresa  result;
 	printf("\nConsultando informacion empresa...");
-
 	fflush(stdout);
+
 	FILE* fichero;
 	fichero = fopen("/home/daniel/Documentos/Lab_Distribuidos/Lab_SD_Hamrguesas/servidor_pedidos/datosEmpresa.txt", "rt");
 	if(fichero == NULL ) {
@@ -24,6 +26,8 @@ consultarempresa_3_svc(void *argp, struct svc_req *rqstp)
 	fgets(result.NIT,MAXNOM,fichero);
 	printf("\nEnviando respuesta datos empresa...");
 	fflush(stdout);
+
+	fclose(fichero);
 	return &result;
 }
 
@@ -31,11 +35,63 @@ listaProductos *
 consultarproductos_3_svc(void *argp, struct svc_req *rqstp)
 {
 	static listaProductos  result;
+	FILE* fichero;
+	printf("\nConsultando informacion productos...");
+	fflush(stdout);
+	//Abro el archivo
+	fichero = fopen("/home/daniel/Documentos/Lab_Distribuidos/Lab_SD_Hamrguesas/servidor_pedidos/datosHamburguesa.txt", "rt");
+	
+	//Verifico si fue posible abrirlo
+	if(fichero == NULL ) {
+		printf("No fue posible abrir el archivo\n");
+		return NULL;
+   	}
 
-	/*
-	 * insert server code here
-	 */
 
+	
+	//Obtengo los datos del fichero
+	char temp2[30];
+	char aux;
+	int cont=0;
+	//int i=0;
+	int j=0;
+
+	while(!feof(fichero)){
+		//limpio la variable temporal
+		aux='\0';
+		char temp[30];
+		for(j=0;aux!='-';j++){
+			aux=fgetc(fichero);
+			if(aux!='-'&&aux!='\0'){
+				temp[j]=aux;
+			}
+			temp[j+1]='\0';
+		}
+		//Copio el nombre del producto
+		strcpy(result.product[cont].nombreIngrediente,temp);
+		fflush(stdout);
+		fgets(temp,30,fichero);
+		//Elimino el salto de linea de la variable temporal
+		
+		for(int k=0;k<30;k++){
+			if(k=='\n'){
+				temp[k]='\0';
+			}			
+		}
+		
+		//Copio el valor del producto
+		result.product[cont].valor=atof(temp);
+		cont++;
+
+	}
+	
+	
+	fclose(fichero);
+
+
+
+	printf("\n Enviando informacion productos...");
+	fflush(stdout);
 	return &result;
 }
 

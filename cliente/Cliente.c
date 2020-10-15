@@ -79,10 +79,10 @@ gestion_hamburguesas_3(char *host)
 				datosProductos(clnt);
 			
 			break;
-			/*
-
+			
+				//Comprar Hamburguesas
 			case 2:
-				
+			/*
 			break;
 
 			case 3:
@@ -170,10 +170,12 @@ void datosProductos(CLIENT *clnt){
 	if (result_2 == (listaProductos *) NULL) {
 		clnt_perror (clnt, "call failed");
 	}
-
-	for (int i=0;i<CANTIDAD_PRODUCTOS;i++){
-		printf("		Producto:%s\n	Precio:%f \n\n",result_2->product[i].nombreIngrediente,result_2->product[i].valor);
+	int i=0;
+	while(i<CANTIDAD_PRODUCTOS&&result_2->product[i].valor!=0){
+		printf("\n		Producto:%s\n	Precio:%f \n",result_2->product[i].nombreIngrediente,result_2->product[i].valor);
+		i++;
 	}
+
 
 
 }

@@ -54,9 +54,14 @@ void datosProductos(CLIENT *clnt);
  * entradas:
  * salidas:
  */
-void editarHamburguesas();
+void editarHamburguesa();
 
-
+/**
+ * procedimiento void eliminar hamburguesa
+ * entrada:
+ * salida
+ */
+void eliminarHamburguesa();
 
 
 
@@ -135,14 +140,16 @@ gestion_hamburguesas_3(char *host)
 			
 			case 3:
 				//Editar hamburgesa
-				editarHamburguesas();
+				editarHamburguesa();
 			break;
 
-			/*
+			
 			case 4:
+				//Eliminar Hamburguesa
+				eliminarHamburguesa();
 				
 			break;
-			*/
+			
 
 
 			case 5:
@@ -374,7 +381,7 @@ void listarBurgersPedidas(){
 }
 
 
-void editarHamburguesas(){
+void editarHamburguesa(){
 	if(posBurger==0){
 		printf("\n No hay hamburgesas registradas...\n");
 		return;
@@ -460,13 +467,38 @@ void editarHamburguesas(){
 			}while(incorrecto==1);
 			fflush(stdin);
 			registrarpedidosistema_3_arg.pedido_hamburguesas[posicion].costo=consultarValorBurger((registrarpedidosistema_3_arg).pedido_hamburguesas[posicion].tipo);
-			
-		
+					
+	}	
+	return;
+}
+
+
+void eliminarHamburguesa(){	
+	if(posBurger==0){
+		printf("\n No hay hamburgesas registradas...\n");
+		return;
 	}
 
+	char identificador[MAXNOM];
+	printf("\n	Ingrese el identificador de la hamburgesa a modificar: ");
+	scanf("%s",identificador);
 
+	int posicion=existeHamburguesa(identificador);
+	if(posicion==-1){
+		printf("\n	Hamburgesa no registrada...");
+	}else{
 
+		nodo_hamburguesa1 burgerVacia;
+		burgerVacia.costo=0;
+		registrarpedidosistema_3_arg.pedido_hamburguesas[posicion]=burgerVacia;
+		for(int i=posicion;i<(posBurger-1);i++){
+			registrarpedidosistema_3_arg.pedido_hamburguesas[i]=registrarpedidosistema_3_arg.pedido_hamburguesas[i+1];
+			registrarpedidosistema_3_arg.pedido_hamburguesas[i+1]=burgerVacia;
+		}
+		posBurger--;
+		printf("\n	La hamburguesa se elimino correctamente...");
 
-		
+	}
 	return;
+
 }

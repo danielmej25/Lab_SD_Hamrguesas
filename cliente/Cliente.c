@@ -600,7 +600,7 @@ void pagarPedido(CLIENT *clnt,char *factura){
 			printf("\n	No se pudo registrar el pedido...");
 		}
 		pedidoPagado=1;
-		printf("\n	Pedido pagado con exito...");
+		printf("\nPedido pagado con exito...");
 
 
 		FILE* fichero;

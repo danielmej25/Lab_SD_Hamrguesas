@@ -4,17 +4,17 @@
 # Parameters
 
 CLIENT = 
-SERVER = ServidorPedidos
+SERVER = ServidorNotificaciones
 
 SOURCES_CLNT.c = 
 SOURCES_CLNT.h = 
-SOURCES_SVC.c =  Servidor.c
-SOURCES_SVC.h =  pedidos.h notificaciones.h
-SOURCES.x = pedidos.x
+SOURCES_SVC.c = Servidor.c
+SOURCES_SVC.h =  notificaciones.h
+SOURCES.x = notificaciones.x
 
-TARGETS_SVC.c = pedidos_svc.c   pedidos_xdr.c notificaciones_clnt.c notificaciones_xdr.c
-TARGETS_CLNT.c =     pedidos_xdr.c 
-TARGETS = pedidos.h pedidos_xdr.c   pedidos_svc.c    
+TARGETS_SVC.c = notificaciones_svc.c   notificaciones_xdr.c 
+TARGETS_CLNT.c =     notificaciones_xdr.c 
+TARGETS = notificaciones.h notificaciones_xdr.c   notificaciones_svc.c    
 
 OBJECTS_CLNT = $(SOURCES_CLNT.c:%.c=%.o) $(TARGETS_CLNT.c:%.c=%.o)
 OBJECTS_SVC = $(SOURCES_SVC.c:%.c=%.o) $(TARGETS_SVC.c:%.c=%.o)

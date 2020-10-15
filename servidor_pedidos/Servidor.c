@@ -5,6 +5,7 @@
  */
 
 #include "pedidos.h"
+#include "notificaciones.h"
 #include <stdio.h>
 
 
@@ -106,10 +107,47 @@ registrarpedidosistema_3_svc(pedido1 *argp, struct svc_req *rqstp)
 
 	if (argp==NULL){
 		printf("\n	Error me llego un pedido nulo");
+		fflush(stdout);
 		result=0;
 	}else{
+		char *host="localhost";
+		CLIENT *clnt;
+		bool_t  *result_1;
+		pedido2  notificarpedidosistema_1_arg;
 
-		result=0;
+	#ifndef	DEBUG
+		clnt = clnt_create (host, notificacion_hamburguesas, notificacion_hamburguesas_version, "udp");
+		if (clnt == NULL) {
+			clnt_pcreateerror (host);
+			printf("Error de conexion con el servidor de notificaciones...");
+			fflush(stdout);
+			result=0;
+			return &result;
+		}
+	#endif	/* DEBUG */
+		for(int i=0;i<MAX_PEDIDO;i++){
+			if(((*argp).pedido_hamburguesas[i].tipo=='m')||
+			((*argp).pedido_hamburguesas[i].tipo=='g')||
+			((*argp).pedido_hamburguesas[i].tipo=='p')){
+				printf("\nEnviando hamburgesa (%s) al servidor notificaciones\n",(*argp).pedido_hamburguesas[i].identificador);
+				fflush(stdout);
+				notificarpedidosistema_1_arg.pedido_hamburguesas[i].tipo=(*argp).pedido_hamburguesas[i].tipo;
+				notificarpedidosistema_1_arg.pedido_hamburguesas[i].cantidadIngredientesExtra=(*argp).pedido_hamburguesas[i].cantidadIngredientesExtra;
+			}
+		}
+		result_1 = notificarpedidosistema_1(&notificarpedidosistema_1_arg, clnt);
+		if ((result_1 == (bool_t *) NULL)||(result_1==0)) {
+			printf("Error de conexion con el servidor de notificaciones...");
+			clnt_perror (clnt, "call failed");
+			fflush(stdout);
+			result=0;
+		}else{
+			printf("Se notifico con exito...");
+			result=1;
+		}
+	#ifndef	DEBUG
+		clnt_destroy (clnt);
+	#endif	 /* DEBUG */
 	}
 
 	return &result;

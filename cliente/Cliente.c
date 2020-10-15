@@ -9,7 +9,7 @@
 
 //Variable que contiene el precio de las tres hamburgesas del menu
 producto burgersBase[3];
-
+int pedidoPagado=0;
 int posBurger=0;
 pedido1  registrarpedidosistema_3_arg;
 
@@ -63,29 +63,26 @@ void editarHamburguesa();
  */
 void eliminarHamburguesa();
 
+/**
+ * procedimiento void que permite visualizar los detalles de la factura hamburguesa
+ * entrada:
+ * salida
+*/
+void mostrarFactura(char *factura);
 
+/**
+ * procedimiento void que permite pegar la factura y enviar el pedido al servidor
+ * entrada:CLIENT
+ * salida
+ */
 
-
-
-
-
-
-
-
+void pagarPedido(CLIENT *clnt,char *factura);
 
 
 void
 gestion_hamburguesas_3(char *host)
 {
 	CLIENT *clnt;
-	//empresa  *result_1;
-	//char *consultarempresa_3_arg;
-
-	//listaProductos  *result_2;
-	//char *consultarproductos_3_arg;
-	bool_t  *result_3;
-	
-
 	//Variables locales
 	int opcion=0;
 
@@ -157,11 +154,34 @@ gestion_hamburguesas_3(char *host)
 				listarBurgersPedidas();
 			break;
 
-			/*
+			
 			case 6:
+				if(posBurger>0){
+					//Generar factura y pagar
+					
+					char factura[300];
+					strcpy(factura,"");
+					mostrarFactura(factura);
+					getchar();
+					char pagar;
+					printf("\n%s \n",factura);
+					printf("\nDesea pagar el pedido y/n: ");
+					scanf("%c",&pagar);
+					getchar();
+
+					if((pagar=='y'||pagar=='Y')&&pedidoPagado==0){
+						//Pagar
+						
+						pagarPedido(clnt,factura);
+					}
+
+				}else{
+					printf("\n	No se han comprado hamburgesas aun...\n");
+				}
+				
 				
 			break;
-			*/
+			
 			case 7:
 				//Se desconecta del servidor pedidos
 				#ifndef	DEBUG
@@ -176,17 +196,6 @@ gestion_hamburguesas_3(char *host)
 			
 
 	}while(opcion!=7);
-
-	
-	
-	/*
-	
-	result_3 = registrarpedidosistema_3(&registrarpedidosistema_3_arg, clnt);
-	if (result_3 == (bool_t *) NULL) {
-		clnt_perror (clnt, "call failed");
-	}
-	*/
-
 
 }
 
@@ -500,5 +509,143 @@ void eliminarHamburguesa(){
 
 	}
 	return;
+
+}
+
+void mostrarFactura(char *factura){
+	
+	int numBurgersP=0;
+	int numBurgersM=0;
+	int numBurgersG=0;
+	float valorNeto=0;
+	float valorTotal=0;
+	float valorIva=0;
+	int iva;
+
+	if(posBurger>0){
+		for(int i=0;i<posBurger;i++){
+			if(registrarpedidosistema_3_arg.pedido_hamburguesas[i].tipo=='p'){
+			numBurgersP++;
+			}else if(registrarpedidosistema_3_arg.pedido_hamburguesas[i].tipo=='m'){
+				numBurgersM++;
+			}else{
+				numBurgersG++;
+			}
+		}
+
+
+
+		valorNeto=(numBurgersP*burgersBase[0].valor)+(numBurgersM*burgersBase[1].valor)+(numBurgersG*burgersBase[2].valor);
+		//Calculo el valor del %IVA
+
+		if(posBurger>=1 && posBurger<=3){
+			iva=5;
+		}else if(posBurger>=4 && posBurger<=7){
+			iva=8;
+		} else if(posBurger>=8){
+			if(valorNeto>=120000){
+				iva=18;
+			}else{
+				iva=15;
+			}
+		}
+
+		valorIva=(valorNeto*(iva))/(100);
+		
+		valorTotal=valorNeto+valorIva;
+		//Guardo estos valores en pedido
+		registrarpedidosistema_3_arg.valorNeto=valorNeto;
+		registrarpedidosistema_3_arg.valorTotal=valorTotal;
+
+		//impresion de la factura
+		char buf[12]; 
+    	gcvt(numBurgersP, 11, buf); 
+		strcat(factura,"Hamburguesas de tipo pequeño:");
+		strcat(factura,buf);
+		
+		gcvt(numBurgersM, 11, buf); 
+		strcat(factura,"\nHamburguesas de tipo mediano:");
+		strcat(factura,buf);
+
+		gcvt(numBurgersG, 11, buf); 
+		strcat(factura,"\nHamburguesas de tipo grande:");
+		strcat(factura,buf);
+
+
+		gcvt(valorNeto, 11, buf); 
+		strcat(factura,"\nCosto sin IVA del pedido: $:");
+		strcat(factura,buf);
+
+		gcvt(valorIva, 11, buf); 
+		strcat(factura,"\nIVA del pedido: $:");
+		strcat(factura,buf);
+
+		gcvt(valorTotal, 11, buf); 
+		strcat(factura,"\nCosto con IVA del pedido: $ ");
+		strcat(factura,buf);
+
+
+	}else{
+		printf("\n	No se han registrado hamburgesas aun...");
+	}
+	return;
+
+}
+void pagarPedido(CLIENT *clnt,char *factura){
+	if(pedidoPagado==0){
+		bool_t  *result_3;
+		result_3 = registrarpedidosistema_3(&registrarpedidosistema_3_arg, clnt);
+		if ((result_3 == (bool_t *) NULL)||result_3==0) {
+			clnt_perror (clnt, "call failed");
+			printf("\n	No se pudo registrar el pedido...");
+		}
+		pedidoPagado=1;
+		printf("\n	Pedido pagado con exito...");
+
+
+		FILE* fichero;
+		FILE* fichero2; 
+		int id=1;
+		char buf[7];
+		char facturaid[MAXNOM];
+		strcpy(facturaid,"factura_");
+
+		//Consulto en que numero de facura voy
+		fichero2 = fopen("infoFacturas.txt", "rt");
+		if(fichero2 == NULL ) {
+			printf("No fue posible crear la factura\n");			
+			fclose(fichero2);	
+			return;
+   		}else{
+			char numId[7];
+			fgets(numId,6,fichero2);
+			id=atoi(numId);
+			id++;
+			fclose(fichero2);
+			fichero2 = fopen("infoFacturas.txt", "wt");
+			fprintf (fichero2, "%d", id, 1);
+			fclose(fichero2);
+			
+		}
+
+		
+		
+		sprintf(buf, "%d", id);
+		strcat(facturaid,buf);
+    	fichero = fopen(facturaid, "wt");
+		if(fichero == NULL ) {
+			printf("No fue posible crear la factura\n");
+			
+			fclose(fichero);	
+   		}else{
+			fputs(factura, fichero);
+			fclose(fichero);	
+		}
+	}else{
+		printf("\n	El pedido ya se pago anteriormente\n");
+	}
+
+
+	
 
 }

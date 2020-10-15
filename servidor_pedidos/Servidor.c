@@ -17,7 +17,7 @@ consultarempresa_3_svc(void *argp, struct svc_req *rqstp)
 	fflush(stdout);
 
 	FILE* fichero;
-	fichero = fopen("/home/daniel/Documentos/Lab_Distribuidos/Lab_SD_Hamrguesas/servidor_pedidos/datosEmpresa.txt", "rt");
+	fichero = fopen("datosEmpresa.txt", "rt");
 	if(fichero == NULL ) {
 		printf("No fue posible abrir el archivo\n");
 		return NULL;
@@ -39,11 +39,12 @@ consultarproductos_3_svc(void *argp, struct svc_req *rqstp)
 	printf("\nConsultando informacion productos...");
 	fflush(stdout);
 	//Abro el archivo
-	fichero = fopen("/home/daniel/Documentos/Lab_Distribuidos/Lab_SD_Hamrguesas/servidor_pedidos/datosHamburguesa.txt", "rt");
+	fichero = fopen("datosHamburguesa.txt", "rt");
 	
 	//Verifico si fue posible abrirlo
 	if(fichero == NULL ) {
 		printf("No fue posible abrir el archivo\n");
+		fflush(stdout);
 		return NULL;
    	}
 
@@ -90,7 +91,7 @@ consultarproductos_3_svc(void *argp, struct svc_req *rqstp)
 
 
 
-	printf("\n Enviando informacion productos...");
+	printf("\nEnviando informacion productos...");
 	fflush(stdout);
 	return &result;
 }
@@ -98,11 +99,18 @@ consultarproductos_3_svc(void *argp, struct svc_req *rqstp)
 bool_t *
 registrarpedidosistema_3_svc(pedido1 *argp, struct svc_req *rqstp)
 {
+	
+	printf("\nRegistrando pedido...");
+	fflush(stdout);
 	static bool_t  result;
 
-	/*
-	 * insert server code here
-	 */
+	if (argp==NULL){
+		printf("\n	Error me llego un pedido nulo");
+		result=0;
+	}else{
+
+		result=0;
+	}
 
 	return &result;
 }
